@@ -1,23 +1,18 @@
 package salespred
 
-import org.apache.spark.sql.SparkSession
-
 object Testing {
-  def main(args: Array[String]) {
-    val spark = SparkSession.builder
-        .master("local")
-        .appName("Future Sales Prediction")
-        .getOrCreate
+    val trainingDataPath = "/hdfs/salespred/sales_train_v2.csv"
 
-    val filepath = "/hdfs/salespred/sales_train_v2.csv"
+    def trainingData =
+        SparkWrapper.get.read
+            .format("csv")
+            .option("header", "true")
+            .option("model", "DROPMALFORMED")
+            .load(trainingDataPath)
 
-    val df = spark.read
-        .format("csv")
-        .option("header", "true")
-        .option("model", "DROPMALFORMED")
-        .load(filepath)
-    
-    df.show(10)
+    def main(args: Array[String]) {
+        val df = trainingData
 
-  }
+        df.show(10)
+    }
 }
