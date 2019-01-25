@@ -4,7 +4,10 @@ import org.apache.spark.{SparkContext, SparkConf}
 
 object Testing {
   def main(args: Array[String]) {
-    val conf = new SparkConf().setAppName("SparkMe Application")
+    val conf = new SparkConf()
+        .setAppName("SparkMe Application")
+        .setMaster("local")
+
     val sc = new SparkContext(conf)
 
     val fileName = "/hdfs/salespred/sales_train_v2.csv"
