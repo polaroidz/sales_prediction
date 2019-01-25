@@ -1,4 +1,6 @@
-package salespred
+package salespred.utils
+
+import salespred.SparkWrapper
 
 import org.apache.spark.sql.DataFrame
 

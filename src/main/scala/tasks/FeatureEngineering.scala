@@ -1,4 +1,6 @@
-package salespred
+package salespred.tasks
+
+import salespred.readers.DatasetReader
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.DataFrame
@@ -12,7 +14,7 @@ object FeatureEngineering {
         .withColumn("days_range", datediff(col("max_date"), col("min_date")))
 
 
-    def main(args: Array[String]) {
+    def run(args: Array[String]) {
         val df = DatasetReader.loadSavedTrainingData
 
         // Date Features

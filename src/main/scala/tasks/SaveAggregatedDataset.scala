@@ -1,4 +1,6 @@
-package salespred
+package salespred.tasks
+
+import salespred.readers.DatasetReader
 
 import org.apache.spark.sql.functions._
 

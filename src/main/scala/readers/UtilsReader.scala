@@ -1,4 +1,6 @@
-package salespred
+package salespred.readers
+
+import salespred.utils.FileUtils
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
