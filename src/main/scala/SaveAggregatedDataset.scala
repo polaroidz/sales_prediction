@@ -10,7 +10,7 @@ object SaveAggregatedDataset {
 
     private val outputPath = "/hdfs/salespred/output/sales_aggregated.csv"
 
-    def main(args: Array[String]) {
+    def run(args: Array[String]) {
         val df = DatasetReader.loadAggregatedData
 
         df.write

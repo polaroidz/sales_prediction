@@ -5,9 +5,11 @@ import org.apache.spark.sql.functions._
 
 object DatasetReader {
     private val trainingDataPath = "/hdfs/salespred/sales_train_v2.csv"
-    private val categoryDataPath = "/hdfs/salespred/item_categories.csv"
+    private val categoryDataPath = "/hdfs/salespred/item_categories_fixed.csv"
     private val itemsDataPath = "/hdfs/salespred/items.csv"
     private val shopsDataPath = "/hdfs/salespred/shops.csv"
+
+    private val outputTrainingPath = "/hdfs/salespred/output/sales_aggregated.csv"
 
     def trainingData =
         SparkWrapper.get.read
@@ -44,6 +46,15 @@ object DatasetReader {
             .option("model", "DROPMALFORMED")
             .load(shopsDataPath)
             .as("shops")
+
+    def loadSavedTrainingData =
+        SparkWrapper.get.read
+            .format("csv")
+            .option("header", "true")
+            .option("inferSchema", "true")
+            .option("model", "DROPMALFORMED")
+            .load(outputTrainingPath)
+            .as("df")
 
     def loadAggregatedData : DataFrame = {
         val df = loadJoinedDataset
