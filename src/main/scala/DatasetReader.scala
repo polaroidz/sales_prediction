@@ -11,50 +11,11 @@ object DatasetReader {
 
     private val outputTrainingPath = "/hdfs/salespred/output/sales_aggregated.csv"
 
-    def trainingData =
-        SparkWrapper.get.read
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "true")
-            .option("model", "DROPMALFORMED")
-            .load(trainingDataPath)
-            .as("df")
-
-    def categoryData =
-        SparkWrapper.get.read
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "true")
-            .option("model", "DROPMALFORMED")
-            .load(categoryDataPath)
-            .as("category")
-
-    def itemsData =
-        SparkWrapper.get.read
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "true")
-            .option("model", "DROPMALFORMED")
-            .load(itemsDataPath)
-            .as("items")
-
-    def shopsData =
-        SparkWrapper.get.read
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "true")
-            .option("model", "DROPMALFORMED")
-            .load(shopsDataPath)
-            .as("shops")
-
-    def loadSavedTrainingData =
-        SparkWrapper.get.read
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "true")
-            .option("model", "DROPMALFORMED")
-            .load(outputTrainingPath)
-            .as("df")
+    def trainingData = FileUtils.readCSV(trainingDataPath, "df")
+    def categoryData = FileUtils.readCSV(categoryDataPath, "category")
+    def itemsData = FileUtils.readCSV(itemsDataPath, "items")
+    def shopsData = FileUtils.readCSV(shopsDataPath, "shops")
+    def loadSavedTrainingData = FileUtils.readCSV(outputTrainingPath, "df")
 
     def loadAggregatedData : DataFrame = {
         val df = loadJoinedDataset
