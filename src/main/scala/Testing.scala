@@ -1,19 +1,23 @@
 package salespred
 
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.sql.SparkSession
 
 object Testing {
   def main(args: Array[String]) {
-    val conf = new SparkConf()
-        .setAppName("SparkMe Application")
-        .setMaster("local")
+    val spark = SparkSession.builder
+        .master("local")
+        .appName("Future Sales Prediction")
+        .getOrCreate
 
-    val sc = new SparkContext(conf)
+    val filepath = "/hdfs/salespred/sales_train_v2.csv"
 
-    val fileName = "/hdfs/salespred/sales_train_v2.csv"
-    val lines = sc.textFile(fileName).cache
+    val df = spark.read
+        .format("csv")
+        .option("header", "true")
+        .option("model", "DROPMALFORMED")
+        .load(filepath)
+    
+    df.show(10)
 
-    val c = lines.count
-    println(s"There are $c lines in $fileName")
   }
 }
