@@ -68,8 +68,13 @@ object DatasetReader {
             col("item_id"))
     }
 
-    def loadJoinedDataset : DataFrame = {
+    def filteredDataset : DataFrame = {
         trainingData
+        .filter(col("item_cnt_day") > 0)
+    }
+
+    def loadJoinedDataset : DataFrame = {
+        filteredDataset
         .join(
             shopsData,
             col("df.shop_id") === col("shops.shop_id"),
