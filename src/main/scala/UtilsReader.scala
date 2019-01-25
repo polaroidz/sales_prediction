@@ -24,7 +24,6 @@ object UtilsReader {
             .option("inferSchema", "true")
             .option("model", "DROPMALFORMED")
             .load(shopCityNamesDataPath)
-            .as("geo")
-
+            .as("city")
 
 }
