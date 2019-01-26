@@ -2,6 +2,7 @@ package salespred.transformers.features
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
 
@@ -15,7 +16,7 @@ class StringToDate()(implicit spark: SparkSession) extends Transformer {
     override def transformSchema(schema: StructType): StructType = schema
     override def copy(extra: ParamMap): Transformer = null
 
-    override def transform(df: Dataset[_]): Dataset[_] = {
+    override def transform(df: Dataset[_]): DataFrame = {
         df.withColumn("date", to_date(col("date"), "dd.MM.yyyy"))
     }
 

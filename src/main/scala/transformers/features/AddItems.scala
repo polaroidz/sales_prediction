@@ -2,6 +2,7 @@ package salespred.transformers.features
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
 
@@ -19,7 +20,7 @@ class AddItems()(implicit spark: SparkSession, files: FileUtils) extends Transfo
     override def transformSchema(schema: StructType): StructType = schema
     override def copy(extra: ParamMap): Transformer = null
 
-    override def transform(df: Dataset[_]): Dataset[_] = {
+    override def transform(df: Dataset[_]): DataFrame = {
         df.join(
             itemsData,
             col("df.item_id") === col("items.item_id"),

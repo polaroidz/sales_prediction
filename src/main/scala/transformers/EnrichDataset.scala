@@ -1,12 +1,16 @@
 package salespred.transformers
 
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.DataFrame
-
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.PipelineStage
 import org.apache.spark.ml.Transformer
+import org.apache.spark.ml.param.ParamMap
+
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.DataFrame
+
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.types.StructType
 
 import salespred.transformers.features.AddCategory
 import salespred.transformers.features.AddCity
@@ -20,7 +24,12 @@ import scala.collection.mutable
 
 class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Transformer {
 
-    override def transform(df: DataFrame): DataFrame = {
+    val uid: String = "EnrichDataset"
+
+    override def transformSchema(schema: StructType): StructType = schema
+    override def copy(extra: ParamMap): Transformer = null
+
+    override def transform(df: Dataset[_]): DataFrame = {
         val stages = new mutable.ArrayBuffer[PipelineStage]()
 
         stages += new AddShop()

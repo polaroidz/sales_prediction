@@ -9,6 +9,9 @@ import salespred.tasks.DatasetFormatting
 
 object App {
 
+    Logger.getLogger("org").setLevel(Level.OFF)
+    Logger.getLogger("akka").setLevel(Level.OFF)
+
     implicit val spark = SparkSession.builder
         .master("local")
         .appName("Future Sales Prediction")
