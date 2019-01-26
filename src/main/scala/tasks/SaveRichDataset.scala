@@ -17,13 +17,13 @@ import salespred.models.TrainingData
 
 import scala.collection.mutable
 
-class DatasetFormatting()(implicit spark: SparkSession, files: FileUtils) {
+class SaveRichDataset()(implicit spark: SparkSession, files: FileUtils) {
     import spark.implicits._
 
     private val trainingDataPath = "/hdfs/salespred/sales_train_v2.csv"
     private lazy val trainingData = files.readCSV(trainingDataPath, "df")
 
-    private val outputPath = "/hdfs/salespred/output/sales_aggregated.csv"
+    private val outputPath = "/hdfs/salespred/output/sales_rich.csv"
 
     def run(args: Array[String]) = {
         val ds = trainingData.as[TrainingData]
@@ -32,18 +32,15 @@ class DatasetFormatting()(implicit spark: SparkSession, files: FileUtils) {
 
         stages += new FilterDataset()
         stages += new EnrichDataset()
-        //stages += new AggregateDataset()
 
         val pipeline = new Pipeline().setStages(stages.toArray).fit(ds)
 
         val output = pipeline.transform(ds)
 
-        output.show(10)
-
-        //output.write
-        //  .format("com.databricks.spark.csv")
-        //  .option("header", "true")
-        //  .option("mode", "overwrite")
-        //  .save(outputPath)
+        output.write
+          .format("com.databricks.spark.csv")
+          .option("header", "true")
+          .option("mode", "overwrite")
+          .save(outputPath)
     }
 }

@@ -22,6 +22,7 @@ import salespred.transformers.features.AddCalendar
 import salespred.transformers.features.AddUSD
 import salespred.transformers.features.AddShopEn
 import salespred.transformers.features.StringToDate
+import salespred.transformers.features.DateFeatures
 
 import salespred.utils.FileUtils
 
@@ -47,6 +48,7 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
         stages += new AddCalendar()
         stages += new AddUSD()
         stages += new StringToDate()
+        stages += new DateFeatures()
 
         val pipeline = new Pipeline().setStages(stages.toArray).fit(df)
 
@@ -56,6 +58,8 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
             col("df.date"),
             col("calendar.holiday"),
             col("calendar.weekend"),
+            col("dayofyear"),
+            col("weekofyear"),
             col("df.shop_id"),
             col("shops.type").as("shop_type"),
             col("shops.name").as("shop_name"),
