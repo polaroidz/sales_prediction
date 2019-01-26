@@ -32,15 +32,18 @@ class DatasetFormatting()(implicit spark: SparkSession, files: FileUtils) {
 
         stages += new FilterDataset()
         stages += new EnrichDataset()
-        stages += new AggregateDataset()
+        //stages += new AggregateDataset()
 
         val pipeline = new Pipeline().setStages(stages.toArray).fit(ds)
 
         val output = pipeline.transform(ds)
 
-        output.write
-          .format("com.databricks.spark.csv")
-          .option("header", "true")
-          .save(outputPath)        
+        output.show(10)
+
+        //output.write
+        //  .format("com.databricks.spark.csv")
+        //  .option("header", "true")
+        //  .option("mode", "overwrite")
+        //  .save(outputPath)
     }
 }

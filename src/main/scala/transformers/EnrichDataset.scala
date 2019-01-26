@@ -17,6 +17,9 @@ import salespred.transformers.features.AddCity
 import salespred.transformers.features.AddItems
 import salespred.transformers.features.AddShop
 import salespred.transformers.features.AddGeoCoordinates
+import salespred.transformers.features.AddEnName
+import salespred.transformers.features.AddCalendar
+import salespred.transformers.features.AddUSD
 
 import salespred.utils.FileUtils
 
@@ -34,9 +37,12 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
 
         stages += new AddShop()
         stages += new AddItems()
+        stages += new AddEnName()
         stages += new AddCategory()
         stages += new AddCity()
         stages += new AddGeoCoordinates()
+        stages += new AddCalendar()
+        stages += new AddUSD()
 
         val pipeline = new Pipeline().setStages(stages.toArray).fit(df)
 
@@ -44,17 +50,20 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
         .select(
             col("df.date_block_num"),
             col("df.date"),
+            col("calendar.holiday"),
+            col("calendar.weekend"),
             col("df.shop_id"),
             col("shops.shop_name"),
             col("city.city_name"),
             col("geo.lat"),
             col("geo.long"),
             col("df.item_id"),
-            col("items.item_name"),
+            col("names.item_name_translated").as("item_name"),
             col("category.item_category_id"),
             col("category.item_category_name"),
             col("df.item_cnt_day"),
-            col("df.item_price")
+            col("df.item_price"),
+            col("usd.cur_rate").as("usd_rate")
         )
     }
 
