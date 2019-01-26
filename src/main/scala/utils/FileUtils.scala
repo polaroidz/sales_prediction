@@ -1,13 +1,12 @@
 package salespred.utils
 
 import salespred.SparkWrapper
-
 import org.apache.spark.sql.DataFrame
 
-object FileUtils {
+class FileUtils()(implicit spark: SparkWrapper) {
 
     def readCSV(path: String, alias:String): DataFrame =
-        SparkWrapper.get.read
+        spark.get.read
             .format("csv")
             .option("header", "true")
             .option("inferSchema", "true")

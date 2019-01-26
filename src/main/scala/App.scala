@@ -1,15 +1,13 @@
 package salespred
 
-import salespred.tasks.SaveAggregatedDataset
-import salespred.readers.UtilsReader
+import salespred.tasks.DatasetFormatting
 
 object App {
 
     def main(args: Array[String]) {
-        //println(args)
-        //UtilsReader.shopCityData.show(10)
+        val task = new DatasetFormatting()
 
-        SaveAggregatedDataset.run(args)
+        task.run()
     }
 
 }

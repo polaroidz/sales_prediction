@@ -4,7 +4,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 
-object SparkWrapper {
+trait SparkWrapper {
 
     // Stopping annoying log      
     Logger.getLogger("org").setLevel(Level.OFF)
