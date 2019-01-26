@@ -6,9 +6,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.PipelineStage
 import org.apache.spark.ml.Transformer
-
-import salespred.SparkWrapper
-import salespred.readers.DatasetReader
+import org.apache.spark.sql.SparkSession
 
 import salespred.transformers.features.AddCategory
 import salespred.transformers.features.AddCity
@@ -16,9 +14,11 @@ import salespred.transformers.features.AddItems
 import salespred.transformers.features.AddShop
 import salespred.transformers.features.AddGeoCoordinates
 
+import salespred.utils.FileUtils
+
 import scala.collection.mutable
 
-class EnrichDataset()(implicit spark: SparkWrapper) extends Transformer {
+class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Transformer {
 
     override def transform(df: DataFrame): DataFrame = {
         val stages = new mutable.ArrayBuffer[PipelineStage]()
@@ -29,7 +29,7 @@ class EnrichDataset()(implicit spark: SparkWrapper) extends Transformer {
         stages += new AddCity()
         stages += new AddGeoCoordinates()
 
-        val pipeline = new Pipeline().setStages(stages.toArray)
+        val pipeline = new Pipeline().setStages(stages.toArray).fit(df)
 
         pipeline.transform(df)
         .select(

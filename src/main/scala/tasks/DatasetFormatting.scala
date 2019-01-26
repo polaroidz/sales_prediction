@@ -5,17 +5,17 @@ import org.apache.spark.ml.PipelineStage
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.SparkSession
 
-import salespred.SparkWrapper
 import salespred.utils.FileUtils
 
-import salespred.transformes.FilterDataset
-import salespred.transformes.EnrichDataset
-import salespred.transformes.AggregateDataset
+import salespred.transformers.FilterDataset
+import salespred.transformers.EnrichDataset
+import salespred.transformers.AggregateDataset
 
 import scala.collection.mutable
 
-class DatasetFormatting()(implicit spark: SparkWrapper, files: FileUtils) {
+class DatasetFormatting()(implicit spark: SparkSession, files: FileUtils) {
     private val trainingDataPath = "/hdfs/salespred/sales_train_v2.csv"
     private lazy val trainingData = files.readCSV(trainingDataPath, "df")
 
@@ -26,7 +26,7 @@ class DatasetFormatting()(implicit spark: SparkWrapper, files: FileUtils) {
         stages += new EnrichDataset()
         stages += new AggregateDataset()
 
-        val pipeline = new Pipeline().setStages(stages.toArray())
+        val pipeline = new Pipeline().setStages(stages.toArray).fit(trainingData)
 
         val output = pipeline.transform(trainingData)
 
