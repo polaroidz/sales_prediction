@@ -47,15 +47,15 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
         stages += new AddGeoCoordinates()
         stages += new AddCalendar()
         stages += new AddUSD()
-        stages += new StringToDate()
-        stages += new DateFeatures()
+        stages += new StringToDate("df.date", "newdate")
+        stages += new DateFeatures("newdate")
 
         val pipeline = new Pipeline().setStages(stages.toArray).fit(df)
 
         pipeline.transform(df)
         .select(
             col("df.date_block_num"),
-            col("df.date"),
+            col("newdate").as("date"),
             col("calendar.holiday"),
             col("calendar.weekend"),
             col("dayofyear"),

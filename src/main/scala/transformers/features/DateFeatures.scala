@@ -9,7 +9,7 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.Transformer
 
-class DateFeatures()(implicit spark: SparkSession) extends Transformer {
+class DateFeatures(in: String)(implicit spark: SparkSession) extends Transformer {
 
     val uid: String = "DateFeatures"
 
@@ -18,8 +18,8 @@ class DateFeatures()(implicit spark: SparkSession) extends Transformer {
 
     override def transform(df: Dataset[_]): DataFrame = {
         df
-        .withColumn("dayofyear", dayofyear(col("date")))
-        .withColumn("weekofyear", weekofyear(col("date")))
+        .withColumn("dayofyear", dayofyear(col(in)))
+        .withColumn("weekofyear", weekofyear(col(in)))
     }
 
 }

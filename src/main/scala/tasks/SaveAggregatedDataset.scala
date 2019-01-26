@@ -9,35 +9,30 @@ import org.apache.spark.sql.SparkSession
 
 import salespred.utils.FileUtils
 
-import salespred.transformers.FilterDataset
-import salespred.transformers.EnrichDataset
 import salespred.transformers.AggregateDataset
+import salespred.transformers.features.MonthlyDateFeatures
 
 import salespred.models.TrainingData
 
 import scala.collection.mutable
 
-class SaveRichDataset()(implicit spark: SparkSession, files: FileUtils) {
+class SaveAggregatedDataset()(implicit spark: SparkSession, files: FileUtils) {
     import spark.implicits._
 
-    private val trainingDataPath = "/hdfs/salespred/sales_train_v2.csv"
-    private lazy val trainingData = files.readCSV(trainingDataPath, "df")
+    private val richDataPath = "/hdfs/salespred/output/sales_rich.csv"
+    private val richData = files.readCSV(richDataPath, "df")
 
-    private val outputPath = "/hdfs/salespred/output/sales_rich.csv"
+    private val outputPath = "/hdfs/salespred/output/sales_aggregated.csv"
 
     def run(args: Array[String]) = {
-        val ds = trainingData.as[TrainingData]
-
         val stages = new mutable.ArrayBuffer[PipelineStage]()
 
-        stages += new FilterDataset()
-        stages += new EnrichDataset()
+        stages += new AggregateDataset()
+        stages += new MonthlyDateFeatures()
 
-        val pipeline = new Pipeline().setStages(stages.toArray).fit(ds)
+        val pipeline = new Pipeline().setStages(stages.toArray).fit(richData)
 
-        val output = pipeline.transform(ds)
-
-        output.show(10)
+        val output = pipeline.transform(richData)
 
         output.write
           .format("com.databricks.spark.csv")

@@ -5,7 +5,9 @@ import org.apache.log4j.Logger
 import org.apache.log4j.Level
 
 import salespred.utils.FileUtils
-import salespred.tasks.DatasetFormatting
+
+import salespred.tasks.SaveRichDataset
+import salespred.tasks.SaveAggregatedDataset
 
 object App {
 
@@ -20,7 +22,8 @@ object App {
     implicit val files = new FileUtils()
 
     def main(args: Array[String]) {
-        val task = new DatasetFormatting()
+        //val task = new SaveRichDataset()
+        val task = new SaveAggregatedDataset()
 
         task.run(args)
     }
