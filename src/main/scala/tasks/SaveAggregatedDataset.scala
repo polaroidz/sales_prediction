@@ -1,7 +1,5 @@
 package salespred.tasks
 
-import salespred.readers.DatasetReader
-
 import org.apache.spark.sql.functions._
 
 // TODO: Investigate these 0.1 prices
@@ -13,7 +11,9 @@ object SaveAggregatedDataset {
     private val outputPath = "/hdfs/salespred/output/sales_aggregated.csv"
 
     def run(args: Array[String]) {
-        val df = DatasetReader.loadAggregatedData
+        val df = DatasetFormatting.loadAggregatedData
+
+        df.show(10)
 
         df.write
           .format("com.databricks.spark.csv")
