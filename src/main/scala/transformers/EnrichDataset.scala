@@ -20,6 +20,8 @@ import salespred.transformers.features.AddGeoCoordinates
 import salespred.transformers.features.AddEnName
 import salespred.transformers.features.AddCalendar
 import salespred.transformers.features.AddUSD
+import salespred.transformers.features.AddShopEn
+import salespred.transformers.features.StringToDate
 
 import salespred.utils.FileUtils
 
@@ -35,7 +37,8 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
     override def transform(df: Dataset[_]): DataFrame = {
         val stages = new mutable.ArrayBuffer[PipelineStage]()
 
-        stages += new AddShop()
+        //stages += new AddShop()
+        stages += new AddShopEn()
         stages += new AddItems()
         stages += new AddEnName()
         stages += new AddCategory()
@@ -43,6 +46,7 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
         stages += new AddGeoCoordinates()
         stages += new AddCalendar()
         stages += new AddUSD()
+        stages += new StringToDate()
 
         val pipeline = new Pipeline().setStages(stages.toArray).fit(df)
 
@@ -53,13 +57,13 @@ class EnrichDataset()(implicit spark: SparkSession, files: FileUtils) extends Tr
             col("calendar.holiday"),
             col("calendar.weekend"),
             col("df.shop_id"),
-            col("shops.shop_name"),
+            col("shops.type").as("shop_type"),
+            col("shops.name").as("shop_name"),
             col("city.city_name"),
             col("geo.lat"),
             col("geo.long"),
             col("df.item_id"),
             col("names.item_name_translated").as("item_name"),
-            col("category.item_category_id"),
             col("category.item_category_name"),
             col("df.item_cnt_day"),
             col("df.item_price"),
