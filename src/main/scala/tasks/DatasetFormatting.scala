@@ -23,6 +23,8 @@ class DatasetFormatting()(implicit spark: SparkSession, files: FileUtils) {
     private val trainingDataPath = "/hdfs/salespred/sales_train_v2.csv"
     private lazy val trainingData = files.readCSV(trainingDataPath, "df")
 
+    private val outputPath = "/hdfs/salespred/output/sales_aggregated.csv"
+
     def run(args: Array[String]) = {
         val ds = trainingData.as[TrainingData]
 
@@ -36,6 +38,9 @@ class DatasetFormatting()(implicit spark: SparkSession, files: FileUtils) {
 
         val output = pipeline.transform(ds)
 
-        output.show(10)
+        output.write
+          .format("com.databricks.spark.csv")
+          .option("header", "true")
+          .save(outputPath)        
     }
 }
