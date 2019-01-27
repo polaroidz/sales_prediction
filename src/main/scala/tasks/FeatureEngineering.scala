@@ -18,9 +18,7 @@ import salespred.utils.FileUtils
 
 import salespred.transformers.AggregateDataset
 
-import salespred.transformers.models.NumericalScaler
-import salespred.transformers.models.CategoricalEncoder
-import salespred.transformers.models.NLPModel
+import salespred.transformers.models.FeaturesEncoder
 
 import scala.collection.mutable
 
@@ -31,25 +29,14 @@ class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
     private val df = files.readCSV(aggDataPath, "df")
 
     def run(args: Array[String]) = {
-        // Numerical Variables
-        //val numericalScaler = new NumericalScaler()
-        //    .fit(df)
-        //val output = numericalScaler.transform(df)
-        //output.select("scaled_features").show(10)
-        // Categorical Variables
-        //val catEncoder = new CategoricalEncoder()
-        //    .fit(df)
-        //val output = catEncoder.transform(df)
-        //output.select("categorical_features").show(10)
 
-        val nlpModel = new NLPModel()
+        val model = new FeaturesEncoder()
             .fit(df)
         
-        val output = nlpModel.transform(df)
+        val output = model.transform(df)
 
-        output.select("nlp_features").show(10)
+        output.show(10)
 
-        // Text Variables
 
     }
 }
