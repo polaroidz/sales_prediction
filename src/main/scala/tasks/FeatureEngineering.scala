@@ -18,6 +18,8 @@ import salespred.utils.FileUtils
 
 import salespred.transformers.AggregateDataset
 
+import salespred.transformers.models.NumericalScaler
+
 import scala.collection.mutable
 
 class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
@@ -26,38 +28,14 @@ class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
     private val aggDataPath = "/hdfs/salespred/output/sales_aggregated.csv"
     private val df = files.readCSV(aggDataPath, "df")
 
-    private val numericalVariables = Array(
-        "lat",
-        "long",
-        "holidays",
-        "weekend_sales",
-        "dayofyear",
-        "weekofyear",
-        "usd_rate",
-        "days_range",
-        "avg_item_price"
-    )
-
     def run(args: Array[String]) = {
         // Numerical Variables
-        val numericalAssembler = new VectorAssembler()
-            .setInputCols(numericalVariables)
-            .setOutputCol("numerical_variables")
+        val numericalScaler = new NumericalScaler()
+            .fit(df)
 
-        val numericalDF = numericalAssembler.transform(df)
+        val output = numericalScaler.transform(df)
 
-        numericalDF.select("numerical_variables").show(10)
-
-        val stdScaler = new StandardScaler()
-            .setInputCol("numerical_variables")
-            .setOutputCol("scaled_variables")
-            .setWithStd(true)
-            .setWithMean(false)
-            .fit(numericalDF)
-
-        val scaledData = stdScaler.transform(numericalDF)
-
-        scaledData.select("scaled_variables").show(10)
+        output.select("scaled_features").show(10)
 
         // Categorical Variables
 
