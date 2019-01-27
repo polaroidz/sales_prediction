@@ -12,8 +12,6 @@ import salespred.utils.FileUtils
 import salespred.transformers.AggregateDataset
 import salespred.transformers.features.MonthlyDateFeatures
 
-import salespred.models.TrainingData
-
 import scala.collection.mutable
 
 class SaveAggregatedDataset()(implicit spark: SparkSession, files: FileUtils) {

@@ -7,7 +7,7 @@ import org.apache.log4j.Level
 import salespred.utils.FileUtils
 
 import salespred.tasks.SaveRichDataset
-import salespred.tasks.SaveAggregatedDataset
+import salespred.tasks.FeatureEngineering
 
 object App {
 
@@ -23,7 +23,7 @@ object App {
 
     def main(args: Array[String]) {
         //val task = new SaveRichDataset()
-        val task = new SaveAggregatedDataset()
+        val task = new FeatureEngineering()
 
         task.run(args)
     }
