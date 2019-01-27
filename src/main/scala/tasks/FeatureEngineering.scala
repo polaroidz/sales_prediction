@@ -20,6 +20,7 @@ import salespred.transformers.AggregateDataset
 
 import salespred.transformers.models.NumericalScaler
 import salespred.transformers.models.CategoricalEncoder
+import salespred.transformers.models.NLPModel
 
 import scala.collection.mutable
 
@@ -36,11 +37,18 @@ class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
         //val output = numericalScaler.transform(df)
         //output.select("scaled_features").show(10)
         // Categorical Variables
-        val catEncoder = new CategoricalEncoder()
+        //val catEncoder = new CategoricalEncoder()
+        //    .fit(df)
+        //val output = catEncoder.transform(df)
+        //output.select("categorical_features").show(10)
+
+        val nlpModel = new NLPModel()
             .fit(df)
         
-        val output = catEncoder.transform(df)
-        output.select("categorical_features").show(10)
+        val output = nlpModel.transform(df)
+
+        output.select("nlp_features").show(10)
+
         // Text Variables
 
     }
