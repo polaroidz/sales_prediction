@@ -18,12 +18,9 @@ import org.apache.spark.ml.feature.StringIndexer
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.feature.OneHotEncoderEstimator
 
-import org.apache.spark.ml.util.MLWritable
-import org.apache.spark.ml.util.MLWriter
-
 import scala.collection.mutable
 
-class CategoricalEncoder()(implicit spark: SparkSession) extends Model with MLWritable {
+class CategoricalEncoder()(implicit spark: SparkSession) extends Model {
 
     val uid: String = "CategoricalEncoder"
 
@@ -36,13 +33,14 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model with MLWr
     private val featuresOh = features.map(e => s"${e}_oh")
     val outputCol = "categorical_features"
 
-    private var model: PipelineModel = _
+    private val modelPath = s"/hdfs/salespred/models/${uid}"
 
     override def transformSchema(schema: StructType): StructType = schema
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
-        var output = model.transform(ds)
+        val loadedModel = PipelineModel.read.load(modelPath)
+        var output = loadedModel.transform(ds)
 
         for (i <- Array.range(0, features.size)) {
             output = output.drop(features(i))
@@ -52,8 +50,6 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model with MLWr
 
         output
     }
-
-    def write: MLWriter = model.write
 
     def fit(ds: Dataset[_]): CategoricalEncoder = {
         val stages = new mutable.ArrayBuffer[PipelineStage]()
@@ -75,9 +71,11 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model with MLWr
             .setInputCols(featuresOh)
             .setOutputCol(outputCol)
 
-        model = new Pipeline()
+        val trainedModel = new Pipeline()
             .setStages(stages.toArray)
-            .fit(ds.na.drop(features))
+            .fit(ds)
+
+        trainedModel.write.overwrite.save(modelPath)
 
         this
     }

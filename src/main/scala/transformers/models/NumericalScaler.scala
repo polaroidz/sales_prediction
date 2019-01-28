@@ -17,10 +17,7 @@ import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.feature.StandardScaler
 
-import org.apache.spark.ml.util.MLWritable
-import org.apache.spark.ml.util.MLWriter
-
-class NumericalScaler()(implicit spark: SparkSession) extends Model with MLWritable {
+class NumericalScaler()(implicit spark: SparkSession) extends Model {
 
     val uid: String = "NumericalScaler"
 
@@ -38,13 +35,28 @@ class NumericalScaler()(implicit spark: SparkSession) extends Model with MLWrita
     private val featuresCol = "numerical_features"
     val outputCol = "scaled_features"
 
-    private var model: PipelineModel = _
+    private val model = new Pipeline()
+    .setStages(Array(
+        new VectorAssembler()
+            .setInputCols(features)
+            .setHandleInvalid("skip")
+            .setOutputCol(featuresCol),
+
+        new StandardScaler()
+            .setInputCol(featuresCol)
+            .setOutputCol(outputCol)
+            .setWithStd(true)
+            .setWithMean(false)
+    ))
+
+    private val modelPath = s"/hdfs/salespred/models/${uid}"
 
     override def transformSchema(schema: StructType): StructType = schema
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
-        var output = model.transform(ds)
+        val loadedModel = PipelineModel.read.load(modelPath)
+        var output = loadedModel.transform(ds)
 
         output = output.drop(col(featuresCol))
 
@@ -55,23 +67,9 @@ class NumericalScaler()(implicit spark: SparkSession) extends Model with MLWrita
         output
     }
 
-    def write: MLWriter = model.write
-
     def fit(ds: Dataset[_]): NumericalScaler = {
-        model = new Pipeline()
-        .setStages(Array(
-            new VectorAssembler()
-                .setInputCols(features)
-                .setHandleInvalid("skip")
-                .setOutputCol(featuresCol),
-
-            new StandardScaler()
-                .setInputCol(featuresCol)
-                .setOutputCol(outputCol)
-                .setWithStd(true)
-                .setWithMean(false)
-        ))
-        .fit(ds.na.drop(features))
+        val trainedModel = model.fit(ds)
+        trainedModel.write.overwrite.save(modelPath)
 
         this
     }
