@@ -15,6 +15,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 
 import salespred.utils.FileUtils
+import salespred.transformers.ml.RegressionModel
 
 import scala.collection.mutable
 
@@ -25,6 +26,13 @@ class MakingPredictions()(implicit spark: SparkSession, files: FileUtils) {
     private val df = files.readParquet(vectorDataPath, "df")
 
     def run(args: Array[String]) = {
-        df.show(10)
+        df.groupBy("item_cnt_month").count.show()
+
+        val model = new RegressionModel()
+            .fit(df)
+        
+        val output = model.transform(df)
+
+        output.show(10)
     }
 }

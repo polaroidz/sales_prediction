@@ -41,7 +41,7 @@ class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
     override def transform(ds: Dataset[_]): DataFrame = {
         var output = model.transform(ds)
 
-        output = output.withColumn("date", date_format(col("min_date"), "MMyyyy").cast("int"))
+        output = output.withColumn("date", date_format(col("min_date"), "yyyyMM").cast("int"))
 
         output = output.select(
             col("date_block_num"),
