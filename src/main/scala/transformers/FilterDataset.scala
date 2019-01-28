@@ -17,7 +17,7 @@ class FilterDataset()(implicit spark: SparkSession) extends Transformer {
     override def copy(extra: ParamMap): Transformer = null
 
     override def transform(ds: Dataset[_]): DataFrame = {
-       ds.filter(col("item_cnt_day") < 0).toDF
+       ds.filter(col("item_cnt_day") > 0).toDF
     }
 
 }

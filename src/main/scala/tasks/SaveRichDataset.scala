@@ -26,6 +26,8 @@ class SaveRichDataset()(implicit spark: SparkSession, files: FileUtils) {
     private val outputPath = "/hdfs/salespred/output/sales_rich.csv"
 
     def run(args: Array[String]) = {
+        println(s"Entered ${trainingData.count} registers")
+
         val ds = trainingData.as[TrainingData]
 
         val stages = new mutable.ArrayBuffer[PipelineStage]()
@@ -37,7 +39,7 @@ class SaveRichDataset()(implicit spark: SparkSession, files: FileUtils) {
 
         val output = pipeline.transform(ds)
 
-        output.show(10)
+        println(s"Outputed ${output.count} registers")
 
         output.write
           .format("com.databricks.spark.csv")

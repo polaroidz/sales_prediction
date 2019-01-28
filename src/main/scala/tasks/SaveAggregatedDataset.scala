@@ -23,6 +23,8 @@ class SaveAggregatedDataset()(implicit spark: SparkSession, files: FileUtils) {
     private val outputPath = "/hdfs/salespred/output/sales_aggregated.csv"
 
     def run(args: Array[String]) = {
+        println(s"Entered ${richData.count} registers")
+
         val stages = new mutable.ArrayBuffer[PipelineStage]()
 
         stages += new AggregateDataset()
@@ -31,6 +33,8 @@ class SaveAggregatedDataset()(implicit spark: SparkSession, files: FileUtils) {
         val pipeline = new Pipeline().setStages(stages.toArray).fit(richData)
 
         val output = pipeline.transform(richData)
+
+        println(s"Outputed ${output.count} registers")
 
         output.write
           .format("com.databricks.spark.csv")

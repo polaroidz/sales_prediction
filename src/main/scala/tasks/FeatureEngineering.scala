@@ -32,12 +32,11 @@ class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
     def run(args: Array[String]) = {
 
         val model = new FeaturesEncoder()
-            .fit(df.na.drop(df.columns))
+            .fit(df)
         
-        val output = model.transform(df.na.drop(df.columns))
+        val output = model.transform(df)
 
         output.show(10)
-
         println(output.count)
 
         output.write
