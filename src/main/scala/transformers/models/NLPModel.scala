@@ -19,9 +19,12 @@ import org.apache.spark.ml.feature.Tokenizer
 import org.apache.spark.ml.feature.HashingTF
 import org.apache.spark.ml.feature.IDF
 
+import org.apache.spark.ml.util.MLWritable
+import org.apache.spark.ml.util.MLWriter
+
 import scala.collection.mutable
 
-class NLPModel()(implicit spark: SparkSession) extends Model {
+class NLPModel()(implicit spark: SparkSession) extends Model with MLWritable {
 
     val uid: String = "NLPModel"
 
@@ -37,15 +40,13 @@ class NLPModel()(implicit spark: SparkSession) extends Model {
     // Number of features on the TF Phase
     val numFeaturesTF = 5
 
-    private val model = new Pipeline()
-    private val modelPath = s"/hdfs/salespred/models/${uid}"
+    private var model: PipelineModel = _
 
     override def transformSchema(schema: StructType): StructType = schema
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
-        val loadedModel = PipelineModel.read.load(modelPath)
-        var output = loadedModel.transform(ds)
+        var output = model.transform(ds)
 
         for (i <- Array.range(0, features.size)) {
             val feature = features(i)
@@ -61,6 +62,8 @@ class NLPModel()(implicit spark: SparkSession) extends Model {
 
         output
     }
+
+    def write: MLWriter = model.write
 
     def fit(ds: Dataset[_]): NLPModel = {
         val stages = new mutable.ArrayBuffer[PipelineStage]()
@@ -89,11 +92,9 @@ class NLPModel()(implicit spark: SparkSession) extends Model {
             .setInputCols(featuresIDF)
             .setOutputCol(outputCol)
 
-        val trainedModel = new Pipeline()
+        model = new Pipeline()
             .setStages(stages.toArray)
             .fit(ds.na.drop(features))
-
-        trainedModel.write.overwrite.save(modelPath)
 
         this
     }

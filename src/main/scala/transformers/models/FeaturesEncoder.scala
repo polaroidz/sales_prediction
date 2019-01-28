@@ -16,9 +16,12 @@ import org.apache.spark.ml.PipelineModel
 
 import org.apache.spark.ml.feature.VectorAssembler
 
+import org.apache.spark.ml.util.MLWritable
+import org.apache.spark.ml.util.MLWriter
+
 import scala.collection.mutable
 
-class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
+class FeaturesEncoder()(implicit spark: SparkSession) extends Model with MLWritable {
 
     val uid: String = "FeaturesEncoder"
 
@@ -30,13 +33,13 @@ class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
     val outputCol = "features"
 
     private val modelPath = s"/hdfs/salespred/models/${uid}"
+    private var model: PipelineModel = _
 
     override def transformSchema(schema: StructType): StructType = schema
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
-        val loadedModel = PipelineModel.read.load(modelPath)
-        var output = loadedModel.transform(ds)
+        var output = model.transform(ds)
 
         for (feature <- features) {
             output = output.drop(col(feature))
@@ -45,6 +48,8 @@ class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
         output
     }
 
+    def write: MLWriter = model.write
+
     def fit(ds: Dataset[_]): FeaturesEncoder = {
         val stages = new mutable.ArrayBuffer[PipelineStage]()
 
@@ -52,11 +57,11 @@ class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
         stages += new CategoricalEncoder()
         stages += new NLPModel()
 
-        val trainedModel = new Pipeline()
+        model = new Pipeline()
             .setStages(stages.toArray)
             .fit(ds)
 
-        trainedModel.write.overwrite.save(modelPath)
+        write.overwrite.save(modelPath)
 
         this
     }
