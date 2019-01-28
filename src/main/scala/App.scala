@@ -6,8 +6,7 @@ import org.apache.log4j.Level
 
 import salespred.utils.FileUtils
 
-import salespred.tasks.SaveRichDataset
-import salespred.tasks.FeatureEngineering
+import salespred.tasks.MakingPredictions
 
 object App {
 
@@ -23,7 +22,7 @@ object App {
 
     def main(args: Array[String]) {
         //val task = new SaveRichDataset()
-        val task = new FeatureEngineering()
+        val task = new MakingPredictions()
 
         task.run(args)
     }

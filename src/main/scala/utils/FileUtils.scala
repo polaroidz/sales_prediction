@@ -14,4 +14,9 @@ class FileUtils()(implicit spark: SparkSession) {
             .load(path)
             .as(alias)
 
+    def readParquet(path: String, alias: String): DataFrame =
+        spark.read
+            .load(path)
+            .as(alias)
+
 }
