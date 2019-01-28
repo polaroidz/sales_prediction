@@ -6,6 +6,8 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
 
+import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
+
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.Model
@@ -29,18 +31,26 @@ class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
     )
     val outputCol = "features"
 
-    private val modelPath = s"/hdfs/salespred/models/${uid}"
+    private var model: PipelineModel = _
 
     override def transformSchema(schema: StructType): StructType = schema
+        .add(outputCol, VectorType)
+
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
-        val loadedModel = PipelineModel.read.load(modelPath)
-        var output = loadedModel.transform(ds)
+        var output = model.transform(ds)
 
-        for (feature <- features) {
-            output = output.drop(col(feature))
-        }
+        output = output.withColumn("date", date_format(col("min_date"), "MMyyyy").cast("int"))
+
+        output = output.select(
+            col("date_block_num"),
+            col("date"),
+            col("shop_id"),
+            col("item_id"),
+            col("features"),
+            col("item_cnt_month")
+        )
 
         output
     }
@@ -52,11 +62,13 @@ class FeaturesEncoder()(implicit spark: SparkSession) extends Model {
         stages += new CategoricalEncoder()
         stages += new NLPModel()
 
-        val trainedModel = new Pipeline()
+        stages += new VectorAssembler()
+            .setInputCols(features)
+            .setOutputCol(outputCol)
+
+        this.model = new Pipeline()
             .setStages(stages.toArray)
             .fit(ds)
-
-        trainedModel.write.overwrite.save(modelPath)
 
         this
     }

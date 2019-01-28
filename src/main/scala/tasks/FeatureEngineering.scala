@@ -26,17 +26,21 @@ class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
     import spark.implicits._
 
     private val aggDataPath = "/hdfs/salespred/output/sales_aggregated.csv"
+    private val vectorDataPath = "/hdfs/salespred/output/sales_vectorized.parquet"
     private val df = files.readCSV(aggDataPath, "df")
 
     def run(args: Array[String]) = {
 
         val model = new FeaturesEncoder()
-            .fit(df)
+            .fit(df.na.fill(0, df.columns))
         
-        val output = model.transform(df)
+        val output = model.transform(df.na.fill(0, df.columns))
 
         output.show(10)
 
-
+        output.write
+            .option("compression","none")
+            .mode("overwrite")
+            .save(vectorDataPath)
     }
 }

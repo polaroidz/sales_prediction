@@ -1,10 +1,14 @@
 package salespred.transformers.models
 
 import org.apache.spark.sql.functions._
+
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.DataType
+
+import org.apache.spark.ml.linalg.SQLDataTypes.VectorType 
 
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.Estimator
@@ -26,6 +30,8 @@ class NumericalScaler()(implicit spark: SparkSession) extends Model {
         "long",
         "holidays",
         "weekend_sales",
+        "month",
+        "year",
         "dayofyear",
         "weekofyear",
         "usd_rate",
@@ -52,6 +58,8 @@ class NumericalScaler()(implicit spark: SparkSession) extends Model {
     private val modelPath = s"/hdfs/salespred/models/${uid}"
 
     override def transformSchema(schema: StructType): StructType = schema
+        .add(outputCol, VectorType)
+
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
