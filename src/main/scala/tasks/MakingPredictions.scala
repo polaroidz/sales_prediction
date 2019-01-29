@@ -18,6 +18,8 @@ import salespred.utils.FileUtils
 import salespred.transformers.ml.RegressionModel
 import salespred.transformers.ml.GradientBoosting
 
+import org.apache.spark.ml.evaluation.RegressionEvaluator
+
 import scala.collection.mutable
 
 class MakingPredictions()(implicit spark: SparkSession, files: FileUtils) {
@@ -27,11 +29,23 @@ class MakingPredictions()(implicit spark: SparkSession, files: FileUtils) {
     private val df = files.readParquet(vectorDataPath, "df")
 
     def run(args: Array[String]) = {
-        val model = new GradientBoosting()
-            .fit(df)
+        val model = new GradientBoosting().getModel
         
-        val output = model.transform(df)
+        val featureImportances = model.featureImportances.toArray
+        val features = new mutable.ArrayBuffer[Tuple2[Int, Double]]()
 
-        output.show(10)
+        for (i <- (0 until featureImportances.size)) {
+            features += new Tuple2(i, featureImportances(i))
+        }
+
+        val selectedFeatures = features.filter(_._2 > 0).map(_._1).toArray
+
+        val disassembler = new org.apache.spark.ml.feature.VectorDisassembler()
+            .setInputCol("features")
+        
+        val disassembledDf = disassembler.transform(df)
+
+        disassembledDf.show(10)
+
     }
 }

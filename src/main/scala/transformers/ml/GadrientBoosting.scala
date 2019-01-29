@@ -27,7 +27,7 @@ class GradientBoosting()(implicit spark: SparkSession) extends Model {
 
     val uid: String = "GradientBoosting"
 
-    private val maxIter = 10
+    private val maxIter = 3
 
     private val featuresCol = "features"
     private val labelCol = "item_cnt_month"
@@ -42,6 +42,8 @@ class GradientBoosting()(implicit spark: SparkSession) extends Model {
 
         model.transform(ds)
     }
+
+    def getModel = GBTRegressionModel.read.load(modelPath)
 
     def fit(ds: Dataset[_]): GradientBoosting = {
         println("Starting training Gradient Boosting with Params")

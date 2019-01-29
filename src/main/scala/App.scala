@@ -13,8 +13,8 @@ import salespred.tasks.FeatureEngineering
 
 object App {
 
-    //Logger.getLogger("org").setLevel(Level.OFF)
-    //Logger.getLogger("akka").setLevel(Level.OFF)
+    Logger.getLogger("org").setLevel(Level.OFF)
+    Logger.getLogger("akka").setLevel(Level.OFF)
 
     implicit val spark = SparkSession.builder
         .master("local[*]")
