@@ -19,6 +19,9 @@ import salespred.utils.FileUtils
 import salespred.transformers.AggregateDataset
 
 import salespred.transformers.models.FeaturesEncoder
+import salespred.transformers.models.NumericalScaler
+import salespred.transformers.models.CategoricalEncoder
+import salespred.transformers.models.NLPModel
 
 import scala.collection.mutable
 
@@ -31,9 +34,11 @@ class FeatureEngineering()(implicit spark: SparkSession, files: FileUtils) {
 
     def run(args: Array[String]) = {
 
-        val model = new FeaturesEncoder()
-            .fit(df)
-        
+        new NumericalScaler().fit(df)
+        new CategoricalEncoder().fit(df)
+        new NLPModel().fit(df)
+
+        val model = new FeaturesEncoder().fit(df)        
         val output = model.transform(df)
 
         output.show(10)

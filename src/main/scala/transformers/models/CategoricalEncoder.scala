@@ -43,8 +43,15 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model {
     override def copy(extra: ParamMap) = defaultCopy(extra)
 
     override def transform(ds: Dataset[_]): DataFrame = {
+        var tds = ds
+
+        for (feature <- features) {
+            tds = tds.withColumn(feature, 
+                when(col(feature).isNull, lit("NA")).otherwise(col(feature)))
+        }
+
         val loadedModel = PipelineModel.read.load(modelPath)
-        var output = loadedModel.transform(ds)
+        var output = loadedModel.transform(tds)
 
         for (i <- Array.range(0, features.size)) {
             output = output.drop(features(i))
@@ -56,6 +63,13 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model {
     }
 
     def fit(ds: Dataset[_]): CategoricalEncoder = {
+        var tds = ds
+
+        for (feature <- features) {
+            tds = tds.withColumn(feature, 
+                when(col(feature).isNull, lit("NA")).otherwise(col(feature)))
+        }
+
         val stages = new mutable.ArrayBuffer[PipelineStage]()
 
         for (i <- Array.range(0, features.size)) {
@@ -65,7 +79,6 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model {
             stages += new StringIndexer()
                 .setInputCol(inFeature)
                 .setOutputCol(outFeature)
-                .setHandleInvalid("keep")
         }
 
         stages += new OneHotEncoderEstimator()
@@ -78,7 +91,7 @@ class CategoricalEncoder()(implicit spark: SparkSession) extends Model {
 
         val trainedModel = new Pipeline()
             .setStages(stages.toArray)
-            .fit(ds)
+            .fit(tds)
 
         trainedModel.write.overwrite.save(modelPath)
 

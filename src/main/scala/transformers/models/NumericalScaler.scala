@@ -64,7 +64,7 @@ class NumericalScaler()(implicit spark: SparkSession) extends Model {
 
     override def transform(ds: Dataset[_]): DataFrame = {
         val loadedModel = PipelineModel.read.load(modelPath)
-        var output = loadedModel.transform(ds)
+        var output = loadedModel.transform(ds.na.fill(0.0, features))
 
         output = output.drop(col(featuresCol))
 
@@ -76,7 +76,7 @@ class NumericalScaler()(implicit spark: SparkSession) extends Model {
     }
 
     def fit(ds: Dataset[_]): NumericalScaler = {
-        val trainedModel = model.fit(ds)
+        val trainedModel = model.fit(ds.na.fill(0.0, features))
         trainedModel.write.overwrite.save(modelPath)
 
         this
