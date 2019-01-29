@@ -26,8 +26,6 @@ class MakingPredictions()(implicit spark: SparkSession, files: FileUtils) {
     private val df = files.readParquet(vectorDataPath, "df")
 
     def run(args: Array[String]) = {
-        df.groupBy("item_cnt_month").count.show()
-
         val model = new RegressionModel()
             .fit(df)
         

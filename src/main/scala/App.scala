@@ -26,8 +26,8 @@ object App {
     def main(args: Array[String]) {
         //val task = new SaveAggregatedDataset()
         //val task = new SaveRichDataset()
-        val task = new FeatureEngineering()
-        //val task = new MakingPredictions()
+        //val task = new FeatureEngineering()
+        val task = new MakingPredictions()
 
         task.run(args)
     }

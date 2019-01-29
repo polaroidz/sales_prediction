@@ -26,7 +26,7 @@ class RegressionModel()(implicit spark: SparkSession) extends Model {
 
     val uid: String = "RegressionModel"
 
-    private val maxIter = 10
+    private val maxIter = 30
     private val regParam = 0.3
     private val elasticNetParam = 0.8
 
