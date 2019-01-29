@@ -16,6 +16,7 @@ import org.apache.spark.sql.SparkSession
 
 import salespred.utils.FileUtils
 import salespred.transformers.ml.RegressionModel
+import salespred.transformers.ml.GradientBoosting
 
 import scala.collection.mutable
 
@@ -26,7 +27,7 @@ class MakingPredictions()(implicit spark: SparkSession, files: FileUtils) {
     private val df = files.readParquet(vectorDataPath, "df")
 
     def run(args: Array[String]) = {
-        val model = new RegressionModel()
+        val model = new GradientBoosting()
             .fit(df)
         
         val output = model.transform(df)
