@@ -21,6 +21,7 @@ import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.regression.LinearRegressionModel
 
+import org.apache.spark.ml.evaluation.RegressionEvaluator
 
 class RegressionModel()(implicit spark: SparkSession) extends Model {
 
@@ -45,13 +46,20 @@ class RegressionModel()(implicit spark: SparkSession) extends Model {
     }
 
     def fit(ds: Dataset[_]): RegressionModel = {
+        println("Starting training Linear Regression with Params")
+        println(s"Max Iter: $maxIter")
+        println(s"Reg Param: $regParam")
+        println(s"Elastic Net Param: $elasticNetParam")
+
+        val Array(trainingData, testData) = ds.randomSplit(Array(0.7, 0.3))
+
         val lr = new LinearRegression()
             .setFeaturesCol(featuresCol)
             .setLabelCol(labelCol)
             .setMaxIter(maxIter)
             .setRegParam(regParam)
             .setElasticNetParam(elasticNetParam)
-            .fit(ds)
+            .fit(trainingData)
 
         lr.write.overwrite.save(modelPath)
 
@@ -65,6 +73,19 @@ class RegressionModel()(implicit spark: SparkSession) extends Model {
         trainingSummary.residuals.show()
         println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
         println(s"r2: ${trainingSummary.r2}")
+
+        val predictions = lr.transform(testData)
+
+        predictions.select("shop_id", "item_id", "date", "features", "item_cnt_month", "prediction")
+            .show(10)
+
+        val evaluator = new RegressionEvaluator()
+            .setLabelCol("item_cnt_month")
+            .setPredictionCol("prediction")
+            .setMetricName("rmse")
+        
+        val rmse = evaluator.evaluate(predictions)
+        println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
         this
     }
